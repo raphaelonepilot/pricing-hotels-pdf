@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulateur Tarifs Séjours 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rouge: #c0392b;
+    --rouge-dark: #96201a;
+    --rouge-light: #e74c3c;
+    --or: #d4a843;
+    --or-light: #f0c060;
+    --fond: #0f0c0a;
+    --fond2: #1a1510;
+    --fond3: #231e18;
+    --fond4: #2e2820;
+    --texte: #f0ebe3;
+    --texte-doux: #b8aa98;
+    --vert: #2ecc71;
+    --bleu: #3498db;
+    --os-color: #27ae60;
+    --ndf-color: #c0392b;
+    --noel-color: #d4a843;
+    --cines-color: #2980b9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--fond);
+    color: var(--texte);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    font-weight: 400;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--rouge-dark) 0%, #1a0a08 60%, var(--fond2) 100%);
+    border-bottom: 2px solid var(--or);
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.6);
+  }
+  .logo-circle {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 2px solid var(--or);
+    background: var(--rouge-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; font-weight: 900; color: var(--or);
+    flex-shrink: 0;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--texte);
+  }
+  header p {
+    font-size: 12px; color: var(--texte-doux); margin-top: 2px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+  }
+
+  /* FORM PANEL */
+  .form-panel {
+    background: var(--fond2);
+    border: 1px solid rgba(212,168,67,0.25);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  }
+  .form-panel h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px; color: var(--or);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .form-panel h2::before { content: ''; display: block; width: 24px; height: 2px; background: var(--or); }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    align-items: end;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--texte-doux);
+  }
+  .field input, .field select {
+    background: var(--fond3);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 11px 14px;
+    color: var(--texte);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--or);
+    box-shadow: 0 0 0 3px rgba(212,168,67,0.12);
+  }
+  .field select option { background: var(--fond3); }
+
+  .btn-calc {
+    background: var(--rouge);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.04em;
+    align-self: end;
+    white-space: nowrap;
+  }
+  .btn-calc:hover { background: var(--rouge-light); transform: translateY(-1px); }
+  .btn-calc:active { transform: translateY(0); }
+
+  /* PERIODE BADGE */
+  .periode-info {
+    margin-top: 16px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+  .periode-info.show { display: flex; }
+  .periode-info.os { background: rgba(39,174,96,0.15); border: 1px solid rgba(39,174,96,0.4); color: #2ecc71; }
+  .periode-info.ndf { background: rgba(192,57,43,0.15); border: 1px solid rgba(192,57,43,0.4); color: #e74c3c; }
+  .periode-info.noel { background: rgba(212,168,67,0.15); border: 1px solid rgba(212,168,67,0.4); color: var(--or-light); }
+  .periode-info.cines { background: rgba(41,128,185,0.15); border: 1px solid rgba(41,128,185,0.4); color: #5dade2; }
+  .periode-info.std { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: var(--texte-doux); }
+
+  /* ERREUR */
+  .error-msg {
+    background: rgba(192,57,43,0.15); border: 1px solid rgba(192,57,43,0.5);
+    border-radius: 8px; padding: 12px 16px;
+    color: #e74c3c; font-size: 14px; margin-top: 12px;
+    display: none;
+  }
+  .error-msg.show { display: block; }
+
+  /* RESULTS SECTION */
+  .results-section { display: none; }
+  .results-section.show { display: block; }
+
+  .results-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 24px;
+  }
+  .results-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; color: var(--texte);
+  }
+  .results-header .sejour-badge {
+    background: var(--rouge-dark);
+    border: 1px solid var(--rouge);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 13px; font-weight: 600;
+    color: var(--texte);
+  }
+
+  /* VILLA MODE TOGGLE */
+  .villa-toggle {
+    display: flex; gap: 0; margin-bottom: 20px;
+    border-radius: 8px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.12);
+    width: fit-content;
+  }
+  .villa-toggle button {
+    background: var(--fond3); border: none;
+    padding: 8px 18px; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; color: var(--texte-doux);
+    cursor: pointer; transition: background 0.2s, color 0.2s;
+  }
+  .villa-toggle button.active {
+    background: var(--rouge); color: #fff; font-weight: 600;
+  }
+  .villa-toggle-label {
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--texte-doux); margin-bottom: 8px;
+  }
+
+  /* HOTELS GRID */
+  .hotels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+  }
+
+  .hotel-card {
+    background: var(--fond2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .hotel-card:hover {
+    border-color: rgba(212,168,67,0.3);
+    box-shadow: 0 6px 30px rgba(0,0,0,0.4);
+  }
+
+  .hotel-card-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .hotel-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px; font-weight: 700; color: var(--texte);
+    line-height: 1.3;
+  }
+  .hotel-sub {
+    font-size: 11px; color: var(--texte-doux); margin-top: 3px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .hotel-icon {
+    font-size: 22px; flex-shrink: 0;
+  }
+
+  .hotel-card-body { padding: 16px 20px 20px; }
+
+  /* TARIF ROWS */
+  .tarif-section-title {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--texte-doux); margin-bottom: 10px; margin-top: 14px;
+    font-weight: 600;
+  }
+  .tarif-section-title:first-child { margin-top: 0; }
+
+  .tarif-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .tarif-row:last-child { border-bottom: none; }
+  .tarif-label { font-size: 13px; color: var(--texte-doux); }
+  .tarif-label span { font-size: 11px; opacity: 0.7; }
+  .tarif-value {
+    font-size: 17px; font-weight: 600; color: var(--texte);
+    font-variant-numeric: tabular-nums;
+  }
+  .tarif-value .currency { font-size: 12px; color: var(--texte-doux); margin-left: 2px; }
+
+  /* Double card (Citadelle) */
+  .hotel-card.double { grid-column: span 2; }
+  @media (max-width: 750px) { .hotel-card.double { grid-column: span 1; } }
+  .double-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  }
+  .double-col {
+    padding: 16px 20px 20px;
+  }
+  .double-col:first-child { border-right: 1px solid rgba(255,255,255,0.07); }
+  .double-col-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--or); font-weight: 600; margin-bottom: 12px;
+    padding-bottom: 8px; border-bottom: 1px solid rgba(212,168,67,0.2);
+  }
+
+  /* N/A */
+  .na { color: rgba(255,255,255,0.2); font-size: 14px; font-style: italic; }
+
+  /* NUIT SUPP note */
+  .nuit-supp-note {
+    font-size: 11px; color: var(--texte-doux); margin-top: 6px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.04); border-radius: 6px;
+    line-height: 1.5;
+  }
+
+  /* Footer info */
+  .info-block {
+    margin-top: 28px;
+    background: var(--fond2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 18px 22px;
+    font-size: 13px; color: var(--texte-doux); line-height: 1.7;
+  }
+  .info-block strong { color: var(--texte); }
+
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr 1fr; }
+    .hotels-grid { grid-template-columns: 1fr; }
+    header { padding: 16px 20px; }
+    main { padding: 20px 16px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-circle">P</div>
+  <div>
+    <h1>Simulateur Tarifs Séjours 2026</h1>
+    <p>Puy du Fou — Document interne</p>
+  </div>
+</header>
+
+<main>
+  <div class="form-panel">
+    <h2>Saisir la réservation</h2>
+    <div class="form-row">
+      <div class="field">
+        <label>Date d'arrivée</label>
+        <input type="date" id="dateArrivee" min="2026-04-01" max="2027-01-03">
+      </div>
+      <div class="field">
+        <label>Date de départ</label>
+        <input type="date" id="dateDepart" min="2026-04-02" max="2027-01-04">
+      </div>
+      <div class="field">
+        <label>Adultes</label>
+        <select id="nbAdultes">
+          <option value="1">1 adulte</option>
+          <option value="2">2 adultes</option>
+          <option value="3">3 adultes</option>
+          <option value="4">4 adultes</option>
+          <option value="5">5 adultes</option>
+          <option value="6">6 adultes</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Enfants (3–11 ans)</label>
+        <select id="nbEnfants">
+          <option value="0">0 enfant</option>
+          <option value="1">1 enfant</option>
+          <option value="2">2 enfants</option>
+          <option value="3">3 enfants</option>
+          <option value="4">4 enfants</option>
+        </select>
+      </div>
+      <button class="btn-calc" onclick="calculer()">Calculer les tarifs</button>
+    </div>
+
+    <div class="periode-info" id="periodeInfo"></div>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <div class="results-section" id="resultsSection">
+    <div class="results-header">
+      <h2>Tarifs par hôtel</h2>
+      <div class="sejour-badge" id="sejourBadge"></div>
+    </div>
+
+    <div class="villa-toggle-label">Villa Gallo-Romaine — Type de tarif :</div>
+    <div class="villa-toggle" id="villaToggle">
+      <button class="active" onclick="setVillaMode('indiv', this)">Individuels</button>
+      <button onclick="setVillaMode('cse', this)">CSE / Groupes</button>
+    </div>
+
+    <div class="hotels-grid" id="hotelsGrid"></div>
+
+    <div class="info-block" id="infoBlock"></div>
+  </div>
+</main>
+
+<script>
+// ============================================================
+// CALENDRIER 2026 — périodes par date
+// ============================================================
+
+// Dates NDF (Noces de Feu) : soirs avec spectacle nocturne NDF
+// Dates OS (Offre Spéciale) : -20% billets
+// Dates Cinéscénie : spectacle nocturne payant en supplément
+// Dates NOËL : décembre/janvier
+
+// Jours d'ouverture par type (selon le calendrier d'ouverture fourni)
+// On code le type de chaque date ouverte
+
+const PERIODS = {}; // 'YYYY-MM-DD' -> 'OS' | 'NDF' | 'NOEL' | 'CINES' | 'STD'
+
+function addPeriod(dates, type) {
+  dates.forEach(d => { PERIODS[d] = type; });
+}
+
+// NOËL : décembre 2026 et janvier 2027
+// Décembre ouvert : 18-24, 26-27, 28-31
+// Janvier 2027 ouvert : 1, 2, 3
+const noelDates = [
+  '2026-12-18','2026-12-19','2026-12-20','2026-12-21','2026-12-22','2026-12-23','2026-12-24',
+  '2026-12-26','2026-12-27','2026-12-28','2026-12-29','2026-12-30','2026-12-31',
+  '2027-01-01','2027-01-02','2027-01-03'
+];
+addPeriod(noelDates, 'NOEL');
+
+// OS (Offre Spéciale, fond vert) : août 7-8, 14-15, 21-22, 28-29
+const osDates = [
+  '2026-08-07','2026-08-08','2026-08-14','2026-08-15','2026-08-21','2026-08-22','2026-08-28','2026-08-29'
+];
+addPeriod(osDates, 'OS');
+
+// Cinéscénie (fond bleu, en supplément) — juin à sept, certains week-ends
+// Juillet : 3-4, 10-11, 17-18, 24-25, 31
+// Août : 1, 7-8, 14-15, 21-22, 28-29
+// Juin : 5-6, 12-13, 19-20, 26-27
+// Septembre : 4-5, 11-12, 18-19, 25-26
+const cinesDates = [
+  // Juin
+  '2026-06-05','2026-06-06','2026-06-12','2026-06-13','2026-06-19','2026-06-20','2026-06-26','2026-06-27',
+  // Juillet
+  '2026-07-03','2026-07-04','2026-07-10','2026-07-11','2026-07-17','2026-07-18','2026-07-24','2026-07-25','2026-07-31',
+  // Août
+  '2026-08-01',
+  // Septembre
+  '2026-09-04','2026-09-05','2026-09-11','2026-09-12','2026-09-18','2026-09-19','2026-09-25','2026-09-26'
+];
+// Note: OS et Cinéscénie peuvent se chevaucher — OS prioritaire car c'est une réduction billets
+// Pour les tarifs, ce qui compte c'est NDF / OS / NOEL / CINES / STD
+// On sépare : OS en août ne chevauche pas CINES (OS = vendredi-samedi, CINES = vendredi-samedi aussi)
+// En pratique : si OS et CINES même date -> 'OS' (les tableaux utilisent la même colonne pour OS en Cinéscénie)
+// Mais les billets PDF+CINES sont séparés. Pour simplifier on marque CINES les nuits cinéscénie hors OS.
+cinesDates.forEach(d => {
+  if (!PERIODS[d]) PERIODS[d] = 'CINES';
+});
+
+// NDF (Noces de Feu) : toutes les nuits d'ouverture avec NDF inclus
+// Avril, mai, juin (hors cinéscénie), juillet, octobre, novembre
+// Selon le calendrier : fond rose = NDF
+// On va définir toutes les dates d'ouverture et classer le reste en NDF ou STD
+
+// Toutes les dates ouvertes (hors NOËL déjà défini)
+function dateRange(start, end) {
+  const dates = [];
+  let d = new Date(start);
+  const e = new Date(end);
+  while (d <= e) {
+    dates.push(d.toISOString().slice(0,10));
+    d.setDate(d.getDate()+1);
+  }
+  return dates;
+}
+
+// Ouverture complète par mois selon le calendrier
+const ouvertureDates = [
+  // Avril : 3-30 (3,4,5 = week-end, puis lundi 6 à 30)
+  ...dateRange('2026-04-03','2026-04-30'),
+  // Mai : 1-3 (VSD), 4 (lundi, fermé?), 8-10 (VSD), 12-17 (lundi-sam), 20-24, 27-31
+  // Simplifié : ouvert du 1 mai au 31 mai selon le calendrier (toutes les cases roses visibles)
+  '2026-05-01','2026-05-02','2026-05-03',
+  '2026-05-08','2026-05-09','2026-05-10',
+  '2026-05-12','2026-05-13','2026-05-14','2026-05-15','2026-05-16','2026-05-17',
+  '2026-05-20','2026-05-21','2026-05-22','2026-05-23','2026-05-24',
+  '2026-05-27','2026-05-28','2026-05-29','2026-05-30','2026-05-31',
+  // Juin : tout le mois sauf les cases grises
+  ...dateRange('2026-06-01','2026-06-30'),
+  // Juillet : tout
+  ...dateRange('2026-07-01','2026-07-31'),
+  // Août : tout
+  ...dateRange('2026-08-01','2026-08-31'),
+  // Septembre : 1-27 (les cases visibles roses/bleues)
+  ...dateRange('2026-09-01','2026-09-27'),
+  // Octobre : 2-4, 8-11, 15-18, 22-25, 29-31
+  '2026-10-02','2026-10-03','2026-10-04',
+  '2026-10-08','2026-10-09','2026-10-10','2026-10-11',
+  '2026-10-15','2026-10-16','2026-10-17','2026-10-18',
+  '2026-10-22','2026-10-23','2026-10-24','2026-10-25',
+  '2026-10-29','2026-10-30','2026-10-31',
+  // Novembre : 1 seulement
+  '2026-11-01',
+];
+
+ouvertureDates.forEach(d => {
+  if (!PERIODS[d]) PERIODS[d] = 'NDF'; // tout ce qui n'est pas classé -> NDF (Noces de Feu inclus)
+});
+
+// ============================================================
+// LOGIQUE DE SÉJOUR
+// ============================================================
+
+function getDaysBetween(d1, d2) {
+  return Math.round((new Date(d2) - new Date(d1)) / 86400000);
+}
+
+function dateToStr(d) {
+  return d.toISOString().slice(0,10);
+}
+
+function getPeriodeForStay(arrivee, depart) {
+  // On regarde toutes les nuits du séjour
+  // La période est déterminée par la première nuit (ou la majorité ? -> on prend la première nuit = date arrivée)
+  // En pratique les tableaux sont par type de séjour avec 1er jour de visite
+  // La période = celle du premier jour de visite (= date arrivée)
+  const str = dateToStr(new Date(arrivee));
+  return PERIODS[str] || null;
+}
+
+function getSejourType(jours, nuits) {
+  // jours = nb de jours (visites), nuits = nb de nuits hébergement
+  if (jours === 1 && nuits === 1) return '1J/1N';
+  if (jours === 2 && nuits === 1) return '2J/1N';
+  if (jours === 2 && nuits === 2) return '2J/2N';
+  if (jours === 3 && nuits === 2) return '3J/2N';
+  if (jours === 3 && nuits === 3) return '3J/3N';
+  if (jours === 4 && nuits === 3) return '4J/3N';
+  return null;
+}
+
+// Pour un séjour donné : jours = nuits + 1 (en général)
+// Arrivée J0 soir, départ J(nuits) matin
+// Nb nuits = départ - arrivée en jours
+// Nb jours de visite = nuits + 1 (on visite le jour d'arrivée et les jours suivants)
+// Mais aussi possible nuits seules (nuit supp)
+
+// ============================================================
+// DONNÉES TARIFAIRES
+// ============================================================
+
+// Structure : hotel -> periode -> sejour -> {adultes: {1,2,3,4,5,6}, enfant}
+// Périodes : NDF, OS, NOEL, CINES (PDF+CINES), STD (hors les 4 = pas ouvert normalement)
+// Note: les tableaux sont séparés en 3 blocs de couleur :
+//   Vert (OS+NDF std), Rouge (NDF seul), Bleu (PDF+CINES), Jaune (NOEL)
+// La correspondance est :
+//   Jours OS -> bloc vert OS
+//   Jours NDF -> bloc rouge NDF (Noces de Feu)
+//   Jours CINES -> bloc bleu PDF+CINES
+//   Jours NOEL -> bloc jaune NOËL
+
+// Pour simplifier et éviter des erreurs de retranscription, je vais coder les données
+// des 6 hôtels avec les tarifs clés par adulte (la colonne 1 = 1 adulte)
+// Le prix total = prix_par_personne * nb_adultes + prix_enfant * nb_enfants
+
+// *** LOGIS DE LESCURE ***
+// Adultes : 6,5,4,3,2,1 colonnes
+// Enfant : dernière colonne
+
+const T_LESCURE = {
+  'NDF': {
+    'nuit_supp': { a:[246.50,134,96.50,77.80,66.50,59], e:21.50 },
+    '1J/1N_OS': { a:[283.50,171,133.50,114.80,103.50,96], e:48.50 },
+    '1J/1N_NDF': { a:[293.50,181,143.50,124.80,113.50,106], e:55.50 },
+    '1J/1N_NOEL': { a:[288.50,176,138.50,119.80,108.50,101], e:52.50 },
+    '2J/2N_OS': { a:[637,372,283.70,239.50,213,195.40], e:89 },
+    '2J/2N_NDF': { a:[765,444.50,337.70,284.30,252.20,230.90], e:102 },
+    '2J/2N_NOEL': { a:[756,435.50,328.70,275.30,243.20,221.90], e:95 },
+  },
+  'OS': {
+    'nuit_supp': { a:[326.50,174,123.20,97.80,82.50,72.40], e:21.50 },
+    '2J/1N': { a:[390.50,238,187.20,161.80,146.50,136.40], e:67.50 },
+    '2J/2N_OS1': { a:[717,412,310.40,259.50,229,208.70], e:89 },
+    '2J/2N_OS2': { a:[828,467.50,347.40,287.30,251.20,227.20], e:89 },
+    '2J/2N_NDF': { a:[845,484.50,364.40,304.30,268.20,244.20], e:102 },
+    '3J/2N_OS1': { a:[724,419,317.40,266.50,236,215.70], e:95 },
+    '3J/2N_OS2': { a:[835,474.50,354.40,294.30,258.20,234.20], e:95 },
+    '3J/3N_OS1': { a:[1161.50,648.50,477.50,392,340.70,306.50], e:116.50 },
+    '3J/3N_OS2': { a:[1272.50,704,514.50,419.80,362.90,325], e:116.50 },
+    '3J/3N_NDF': { a:[1292.50,724,534.50,439.80,382.90,345], e:129.50 },
+    '4J/3N_OS1': { a:[1166.50,653.50,482.50,397,345.70,311.50], e:119.50 },
+    '4J/3N_OS2': { a:[1277.50,709,519.50,424.80,367.90,330], e:119.50 },
+  },
+  'CINES': {
+    'nuit_supp': { a:[437.50,229.50,160.20,125.50,104.70,90.90], e:21.50 },
+    '2J/1N_NDF': { a:[518.50,310.50,241.20,206.50,185.70,171.90], e:80.50 },
+    '2J/2N_NDF1': { a:[956,540,401.40,332,290.40,262.70], e:102 },
+    '3J/2N_NDF1': { a:[855,494.50,374.40,314.30,278.20,254.20], e:108 },
+    '3J/2N_NDF2': { a:[966,550,411.40,342,300.40,272.70], e:108 },
+    '3J/3N_NDF1': { a:[1403.50,779.50,571.50,467.50,405.10,363.50], e:129.50 },
+    '3J/3N_NDF2': { a:[1409.50,785.50,577.50,473.50,411.10,369.50], e:134.50 },
+    '4J/3N_NDF1': { a:[1298.50,730,540.50,445.80,388.90,351], e:134.50 },
+    '4J/3N_NDF2': { a:[1409.50,785.50,577.50,473.50,411.10,369.50], e:134.50 },
+  },
+  // PDF+CINES block
+  'PDF_CINES': {
+    'nuit_supp': { a:[573.50,297.50,205.50,159.50,131.90,113.50], e:21.50 },
+    '2J/1N': { a:[682.50,406.50,314.50,268.50,240.90,222.50], e:109.50 },
+    '2J/2N': { a:[1120,636,474.70,394,345.60,313.40], e:131 },
+    '3J/2N': { a:[1129,645,483.70,403,354.60,322.40], e:137 },
+    '3J/3N_1': { a:[1455.50,819,606.90,500.80,437.10,394.70], e:158.50 },
+    '3J/3N_2': { a:[1566.50,874,643.90,528.50,459.30,413.20], e:158.50 },
+    '4J/3N_1': { a:[1461.50,825,612.90,506.80,443.10,400.70], e:162.50 },
+    '4J/3N_2': { a:[1572.50,880.50,649.90,534.50,465.30,419.20], e:162.50 },
+  },
+  'NOEL': {
+    'nuit_supp': { a:[437.50,229.50,160.20,125.50,104.70,90.90], e:21.50 },
+    '2J/1N': { a:[509.50,301.50,232.20,197.50,176.70,162.90], e:73.50 },
+    '2J/2N': { a:[947,531,392.40,323,281.40,253.70], e:95 },
+    '3J/2N': { a:[956,540,401.40,332,290.40,262.70], e:101 },
+    '3J/3N': { a:[1393.50,769.50,561.50,457.50,395.10,353.50], e:122.50 },
+    '4J/3N': { a:[1398.50,774.50,566.50,462.50,400.10,358.50], e:126.50 },
+  }
+};
+
+// *** LE GRAND SIÈCLE ***
+// Adultes : 4,3,2,1
+const T_GRAND_SIECLE = {
+  'NDF_OS': {
+    'nuit_supp': { a:[177.90,98.90,72.60,59.40], e:19.90 },
+    '1J/1N_OS': { a:[214.90,135.90,109.60,96.40], e:46.90 },
+    '1J/1N_NDF': { a:[224.90,145.90,119.60,106.40], e:53.90 },
+    '1J/1N_NOEL': { a:[219.90,140.90,114.60,101.40], e:50.90 },
+    '2J/2N_OS': { a:[486.80,295.30,231.50,199.60], e:85.80 },
+    '2J/2N_NDF': { a:[583.80,352.30,275.20,236.60], e:98.80 },
+    '2J/2N_NOEL': { a:[574.80,343.30,266.20,227.60], e:91.80 },
+  },
+  'OS': {
+    'nuit_supp': { a:[244.90,132.40,94.90,76.20], e:19.90 },
+    '2J/1N': { a:[308.90,196.40,158.90,140.20], e:65.90 },
+    '2J/2N_1': { a:[553.80,328.80,253.80,216.30], e:85.80 },
+    '2J/2N_2': { a:[633.80,368.80,280.50,236.30], e:85.80 },
+    '2J/2N_NDF': { a:[650.80,385.80,297.50,253.30], e:98.80 },
+    '3J/2N_1': { a:[560.80,335.80,260.80,223.30], e:91.80 },
+    '3J/2N_2': { a:[640.80,375.80,287.50,243.30], e:91.80 },
+    '3J/3N_1': { a:[885.70,508.20,382.40,319.50], e:111.70 },
+    '3J/3N_2': { a:[965.70,548.20,409.10,339.50], e:111.70 },
+    '3J/3N_NDF': { a:[985.70,568.20,429.10,359.50], e:124.70 },
+    '4J/3N_1': { a:[890.70,513.20,387.40,324.50], e:114.70 },
+    '4J/3N_2': { a:[970.70,553.20,414.10,344.50], e:114.70 },
+  },
+  'CINES': {
+    'nuit_supp': { a:[324.90,172.40,121.60,96.20], e:19.90 },
+    '2J/1N_NDF': { a:[405.90,253.40,202.60,177.20], e:78.90 },
+    '2J/2N_NDF1': { a:[730.80,425.80,324.20,273.30], e:98.80 },
+    '3J/2N_NDF1': { a:[660.80,395.80,307.50,263.30], e:104.80 },
+    '3J/2N_NDF2': { a:[740.80,435.80,334.20,283.30], e:104.80 },
+    '3J/3N_NDF1': { a:[1065.70,608.20,455.70,379.50], e:124.70 },
+    '3J/3N_NDF2': { a:[1071.70,614.20,461.70,385.50], e:129.70 },
+    '4J/3N_NDF1': { a:[991.70,574.20,435.10,365.50], e:129.70 },
+    '4J/3N_NDF2': { a:[1071.70,614.20,461.70,385.50], e:129.70 },
+  },
+  'PDF_CINES': {
+    'nuit_supp': { a:[423.90,221.90,154.60,120.90], e:19.90 },
+    '2J/1N': { a:[532.90,330.90,263.60,229.90], e:107.90 },
+    '2J/2N': { a:[857.80,503.30,385.20,326.10], e:127.80 },
+    '3J/2N': { a:[866.80,512.30,394.20,335.10], e:133.80 },
+    '3J/3N_1': { a:[1111.70,644.70,489.10,411.20], e:153.70 },
+    '3J/3N_2': { a:[1191.70,684.70,515.70,431.20], e:153.70 },
+    '4J/3N_1': { a:[1117.70,650.70,495.10,417.20], e:157.70 },
+    '4J/3N_2': { a:[1197.70,690.70,521.70,437.20], e:157.70 },
+  },
+  'NOEL': {
+    'nuit_supp': { a:[324.90,172.40,121.60,96.20], e:19.90 },
+    '2J/1N': { a:[396.90,244.40,193.60,168.20], e:71.90 },
+    '2J/2N': { a:[721.80,416.80,315.20,264.30], e:91.80 },
+    '3J/2N': { a:[730.80,425.80,324.20,273.30], e:97.80 },
+    '3J/3N': { a:[1055.70,598.20,445.70,369.50], e:117.70 },
+    '4J/3N': { a:[1060.70,603.20,450.70,374.50], e:121.70 },
+  }
+};
+
+// *** LA CITADELLE CLASSIQUE ***
+// Adultes : 4,3,2,1
+const T_CITADELLE_CL = {
+  'NDF_OS': {
+    'nuit_supp': { a:[148.90,83.40,61.60,50.70], e:17.90 },
+    '1J/1N_OS': { a:[185.90,120.40,98.60,87.70], e:44.90 },
+    '1J/1N_NDF': { a:[195.90,130.40,108.60,97.70], e:51.90 },
+    '1J/1N_NOEL': { a:[190.90,125.40,103.60,92.70], e:48.90 },
+    '2J/2N_OS': { a:[418.80,259.30,206.20,179.60], e:81.80 },
+    '2J/2N_NDF': { a:[502.80,309.80,245.50,213.30], e:94.80 },
+    '2J/2N_NOEL': { a:[493.80,300.80,236.50,204.30], e:87.80 },
+  },
+  'OS': {
+    'nuit_supp': { a:[205.90,111.90,80.60,64.90], e:17.90 },
+    '2J/1N': { a:[269.90,175.90,144.60,128.90], e:63.90 },
+    '2J/2N_1': { a:[475.80,287.80,225.20,193.80], e:81.80 },
+    '2J/2N_2': { a:[542.80,321.30,247.50,210.60], e:81.80 },
+    '2J/2N_NDF': { a:[559.80,338.30,264.50,227.60], e:94.80 },
+    '3J/2N_1': { a:[482.80,294.80,232.20,200.80], e:87.80 },
+    '3J/2N_2': { a:[549.80,328.30,254.50,217.60], e:87.80 },
+    '3J/3N_1': { a:[755.70,440.20,335.10,282.50], e:105.70 },
+    '3J/3N_2': { a:[822.70,473.70,357.40,299.20], e:105.70 },
+    '3J/3N_NDF': { a:[842.70,493.70,377.40,319.20], e:118.70 },
+    '4J/3N_1': { a:[760.70,445.20,340.10,287.50], e:108.70 },
+    '4J/3N_2': { a:[827.70,478.70,362.40,304.20], e:108.70 },
+  },
+  'CINES': {
+    'nuit_supp': { a:[272.90,145.40,102.90,81.70], e:17.90 },
+    '2J/1N': { a:[353.90,226.40,183.90,162.70], e:76.90 },
+    '2J/2N_1': { a:[626.80,371.80,286.80,244.30], e:94.80 },
+    '3J/2N_1': { a:[569.80,348.30,274.50,237.60], e:100.80 },
+    '3J/2N_2': { a:[636.80,381.80,296.80,254.30], e:100.80 },
+    '3J/3N_1': { a:[909.70,527.20,399.70,336], e:118.70 },
+    '3J/3N_2': { a:[915.70,533.20,405.70,342], e:123.70 },
+    '4J/3N_1': { a:[848.70,499.70,383.40,325.20], e:123.70 },
+    '4J/3N_2': { a:[915.70,533.20,405.70,342], e:123.70 },
+  },
+  'PDF_CINES': {
+    'nuit_supp': { a:[355.90,186.90,130.60,102.40], e:17.90 },
+    '2J/1N': { a:[464.90,295.90,239.60,211.40], e:105.90 },
+    '2J/2N': { a:[737.80,441.30,342.50,293.10], e:123.80 },
+    '3J/2N': { a:[746.80,450.30,351.50,302.10], e:129.80 },
+    '3J/3N_1': { a:[952.70,562.20,432.10,367], e:147.70 },
+    '3J/3N_2': { a:[1019.70,595.70,454.40,383.70], e:147.70 },
+    '4J/3N_1': { a:[958.70,568.20,438.10,373], e:151.70 },
+    '4J/3N_2': { a:[1025.70,601.70,460.40,389.70], e:151.70 },
+  },
+  'NOEL': {
+    'nuit_supp': { a:[272.90,145.40,102.90,81.70], e:17.90 },
+    '2J/1N': { a:[344.90,217.40,174.90,153.70], e:69.90 },
+    '2J/2N': { a:[617.80,362.80,277.80,235.30], e:87.80 },
+    '3J/2N': { a:[626.80,371.80,286.80,244.30], e:93.80 },
+    '3J/3N': { a:[899.70,517.20,389.70,326], e:111.70 },
+    '4J/3N': { a:[904.70,522.20,394.70,331], e:115.70 },
+  }
+};
+
+// *** LA CITADELLE CONFORT ***
+// Adultes : 2,1 seulement
+const T_CITADELLE_CO = {
+  'NDF_OS': {
+    'nuit_supp': { a:[175.90,96.90], e:17.90 },
+    '1J/1N_OS': { a:[212.90,133.90], e:44.90 },
+    '1J/1N_NDF': { a:[222.90,143.90], e:51.90 },
+    '1J/1N_NOEL': { a:[217.90,138.90], e:48.90 },
+    '2J/2N_OS': { a:[483.80,291.80], e:81.80 },
+    '2J/2N_NDF': { a:[556.80,336.80], e:94.80 },
+    '2J/2N_NOEL': { a:[547.80,327.80], e:87.80 },
+  },
+  'OS': {
+    'nuit_supp': { a:[243.90,130.90], e:17.90 },
+    '2J/1N': { a:[307.90,194.90], e:63.90 },
+    '2J/2N_1': { a:[551.80,325.80], e:81.80 },
+    '2J/2N_2': { a:[607.80,353.80], e:81.80 },
+    '2J/2N_NDF': { a:[624.80,370.80], e:94.80 },
+    '3J/2N_1': { a:[558.80,332.80], e:87.80 },
+    '3J/2N_2': { a:[614.80,360.80], e:87.80 },
+    '3J/3N_1': { a:[858.70,491.70], e:105.70 },
+    '3J/3N_2': { a:[914.70,519.70], e:105.70 },
+    '3J/3N_NDF': { a:[934.70,539.70], e:118.70 },
+    '4J/3N_1': { a:[863.70,496.70], e:108.70 },
+    '4J/3N_2': { a:[919.70,524.70], e:108.70 },
+  },
+  'CINES': {
+    'nuit_supp': { a:[299.90,158.90], e:17.90 },
+    '2J/1N': { a:[380.90,239.90], e:76.90 },
+    '2J/2N_1': { a:[680.80,398.80], e:94.80 },
+    '3J/2N_1': { a:[634.80,380.80], e:100.80 },
+    '3J/2N_2': { a:[690.80,408.80], e:100.80 },
+    '3J/3N_1': { a:[990.70,567.70], e:118.70 },
+    '3J/3N_2': { a:[996.70,573.70], e:123.70 },
+    '4J/3N_1': { a:[940.70,545.70], e:123.70 },
+    '4J/3N_2': { a:[996.70,573.70], e:123.70 },
+  },
+  'PDF_CINES': {
+    'nuit_supp': { a:[387.90,202.90], e:17.90 },
+    '2J/1N': { a:[496.90,311.90], e:105.90 },
+    '2J/2N': { a:[796.80,470.80], e:123.80 },
+    '3J/2N': { a:[805.80,479.80], e:129.80 },
+    '3J/3N_1': { a:[1105.70,638.70], e:147.70 },
+    '3J/3N_2': { a:[1049.70,610.70], e:147.70 },
+    '4J/3N_1': { a:[1055.70,616.70], e:151.70 },
+    '4J/3N_2': { a:[1111.70,644.70], e:151.70 },
+  },
+  'NOEL': {
+    'nuit_supp': { a:[299.90,158.90], e:17.90 },
+    '2J/1N': { a:[371.90,230.90], e:69.90 },
+    '2J/2N': { a:[671.80,389.80], e:87.80 },
+    '3J/2N': { a:[680.80,398.80], e:93.80 },
+    '3J/3N': { a:[980.70,557.70], e:111.70 },
+    '4J/3N': { a:[985.70,562.70], e:115.70 },
+  }
+};
+
+// *** LES ÎLES DE CLOVIS ***
+// Adultes : 4,3,2,1 — mêmes tarifs que Citadelle Classique sur la majorité des lignes
+const T_ILES_CLOVIS = {
+  'NDF_OS': {
+    'nuit_supp': { a:[148.90,83.40,61.60,50.70], e:17.90 },
+    '1J/1N_OS': { a:[185.90,120.40,98.60,87.70], e:44.90 },
+    '1J/1N_NDF': { a:[195.90,130.40,108.60,97.70], e:51.90 },
+    '1J/1N_NOEL': { a:[190.90,125.40,103.60,92.70], e:48.90 },
+    '2J/2N_OS': { a:[418.80,259.30,206.20,179.60], e:81.80 },
+    '2J/2N_NDF': { a:[502.80,309.80,245.50,213.30], e:94.80 },
+    '2J/2N_NOEL': { a:[493.80,300.80,236.50,204.30], e:87.80 },
+  },
+  'OS': {
+    'nuit_supp': { a:[205.90,111.90,80.60,64.90], e:17.90 },
+    '2J/1N': { a:[269.90,175.90,144.60,128.90], e:63.90 },
+    '2J/2N_1': { a:[475.80,287.80,225.20,193.80], e:81.80 },
+    '2J/2N_2': { a:[542.80,321.30,247.50,210.60], e:81.80 },
+    '2J/2N_NDF': { a:[559.80,338.30,264.50,227.60], e:94.80 },
+    '3J/2N_1': { a:[482.80,294.80,232.20,200.80], e:87.80 },
+    '3J/2N_2': { a:[549.80,328.30,254.50,217.60], e:87.80 },
+    '3J/3N_1': { a:[755.70,440.20,335.10,282.50], e:105.70 },
+    '3J/3N_2': { a:[822.70,473.70,357.40,299.20], e:105.70 },
+    '3J/3N_NDF': { a:[842.70,493.70,377.40,319.20], e:118.70 },
+    '4J/3N_1': { a:[760.70,445.20,340.10,287.50], e:108.70 },
+    '4J/3N_2': { a:[827.70,478.70,362.40,304.20], e:108.70 },
+  },
+  'CINES': {
+    'nuit_supp': { a:[272.90,145.40,102.90,81.70], e:17.90 },
+    '2J/1N': { a:[353.90,226.40,183.90,162.70], e:76.90 },
+    '2J/2N_1': { a:[626.80,371.80,286.80,244.30], e:94.80 },
+    '3J/2N_1': { a:[569.80,348.30,274.50,237.60], e:100.80 },
+    '3J/2N_2': { a:[636.80,381.80,296.80,254.30], e:100.80 },
+    '3J/3N_1': { a:[909.70,527.20,399.70,336], e:118.70 },
+    '3J/3N_2': { a:[915.70,533.20,405.70,342], e:123.70 },
+    '4J/3N_1': { a:[848.70,499.70,383.40,325.20], e:123.70 },
+    '4J/3N_2': { a:[915.70,533.20,405.70,342], e:123.70 },
+  },
+  'PDF_CINES': {
+    'nuit_supp': { a:[355.90,186.90,130.60,102.40], e:17.90 },
+    '2J/1N': { a:[464.90,295.90,239.60,211.40], e:105.90 },
+    '2J/2N': { a:[737.80,441.30,342.50,293.10], e:123.80 },
+    '3J/2N': { a:[746.80,450.30,351.50,302.10], e:129.80 },
+    '3J/3N_1': { a:[952.70,562.20,432.10,367], e:147.70 },
+    '3J/3N_2': { a:[1019.70,595.70,454.40,383.70], e:147.70 },
+    '4J/3N_1': { a:[958.70,568.20,438.10,373], e:151.70 },
+    '4J/3N_2': { a:[1025.70,601.70,460.40,389.70], e:151.70 },
+  },
+  'NOEL': {
+    'nuit_supp': { a:[272.90,145.40,102.90,81.70], e:17.90 },
+    '2J/1N': { a:[344.90,217.40,174.90,153.70], e:69.90 },
+    '2J/2N': { a:[617.80,362.80,277.80,235.30], e:87.80 },
+    '3J/2N': { a:[626.80,371.80,286.80,244.30], e:93.80 },
+    '3J/3N': { a:[899.70,517.20,389.70,326], e:111.70 },
+    '4J/3N': { a:[904.70,522.20,394.70,331], e:115.70 },
+  }
+};
+
+// *** LA VILLA GALLO-ROMAINE ***
+// Deux modes : Individuels (4,3,2,1) et CSE/Groupes (4,3,2,1)
+const T_VILLA_INDIV = {
+  'NDF_OS': {
+    'nuit_supp': { a:[148.90,83.40,61.60,50.70], e:17.90 },
+    '1J/1N_OS': { a:[185.90,120.40,98.60,87.70], e:44.90 },
+    '1J/1N_NDF': { a:[195.90,130.40,108.60,97.70], e:51.90 },
+    '1J/1N_NOEL': { a:[190.90,125.40,103.60,92.70], e:48.90 },
+    '2J/2N_OS': { a:[418.80,259.30,206.20,179.60], e:81.80 },
+    '2J/2N_NDF': { a:[502.80,309.80,245.50,213.30], e:94.80 },
+    '2J/2N_NOEL': { a:[493.80,300.80,236.50,204.30], e:87.80 },
+  },
+  'OS': {
+    'nuit_supp': { a:[205.90,111.90,80.60,64.90], e:17.90 },
+    '2J/1N': { a:[269.90,175.90,144.60,128.90], e:63.90 },
+    '2J/2N_1': { a:[475.80,287.80,225.20,193.80], e:81.80 },
+    '2J/2N_2': { a:[542.80,321.30,247.50,210.60], e:81.80 },
+    '2J/2N_NDF': { a:[559.80,338.30,264.50,227.60], e:94.80 },
+    '3J/2N_1': { a:[482.80,294.80,232.20,200.80], e:87.80 },
+    '3J/2N_2': { a:[549.80,328.30,254.50,217.60], e:87.80 },
+    '3J/3N_1': { a:[755.70,440.20,335.10,282.50], e:105.70 },
+    '3J/3N_2': { a:[822.70,473.70,357.40,299.20], e:105.70 },
+    '3J/3N_NDF': { a:[842.70,493.70,377.40,319.20], e:118.70 },
+    '4J/3N_1': { a:[760.70,445.20,340.10,287.50], e:108.70 },
+    '4J/3N_2': { a:[827.70,478.70,362.40,304.20], e:108.70 },
+  },
+  'CINES': {
+    'nuit_supp': { a:[272.90,145.40,102.90,81.70], e:17.90 },
+    '2J/1N': { a:[353.90,226.40,183.90,162.70], e:76.90 },
+    '2J/2N_1': { a:[626.80,371.80,286.80,244.30], e:94.80 },
+    '3J/2N_1': { a:[569.80,348.30,274.50,237.60], e:100.80 },
+    '3J/2N_2': { a:[636.80,381.80,296.80,254.30], e:100.80 },
+    '3J/3N_1': { a:[909.70,527.20,399.70,336], e:118.70 },
+    '3J/3N_2': { a:[915.70,533.20,405.70,342], e:123.70 },
+    '4J/3N_1': { a:[848.70,499.70,383.40,325.20], e:123.70 },
+    '4J/3N_2': { a:[915.70,533.20,405.70,342], e:123.70 },
+  },
+  'PDF_CINES': {
+    'nuit_supp': { a:[355.90,186.90,130.60,102.40], e:17.90 },
+    '2J/1N': { a:[464.90,295.90,239.60,211.40], e:105.90 },
+    '2J/2N': { a:[737.80,441.30,342.50,293.10], e:123.80 },
+    '3J/2N': { a:[746.80,450.30,351.50,302.10], e:129.80 },
+    '3J/3N_1': { a:[952.70,562.20,432.10,367], e:147.70 },
+    '3J/3N_2': { a:[1019.70,595.70,454.40,383.70], e:147.70 },
+    '4J/3N_1': { a:[958.70,568.20,438.10,373], e:151.70 },
+    '4J/3N_2': { a:[1025.70,601.70,460.40,389.70], e:151.70 },
+  },
+  'NOEL': {
+    'nuit_supp': { a:[272.90,145.40,102.90,81.70], e:17.90 },
+    '2J/1N': { a:[344.90,217.40,174.90,153.70], e:69.90 },
+    '2J/2N': { a:[617.80,362.80,277.80,235.30], e:87.80 },
+    '3J/2N': { a:[626.80,371.80,286.80,244.30], e:93.80 },
+    '3J/3N': { a:[899.70,517.20,389.70,326], e:111.70 },
+    '4J/3N': { a:[904.70,522.20,394.70,331], e:115.70 },
+  }
+};
+
+const T_VILLA_CSE = {
+  'NDF_OS': {
+    'nuit_supp': { a:[143,80.10,59.20,48.70], e:17.20 },
+    '1J/1N_OS': { a:[177,114.20,93.20,82.70], e:42.10 },
+    '1J/1N_NDF': { a:[186.20,123.40,102.40,91.90], e:48.50 },
+    '1J/1N_NOEL': { a:[181.60,118.80,97.80,87.30], e:45.80 },
+    '2J/2N_OS': { a:[399.50,246.40,195.40,169.90], e:76.70 },
+    '2J/2N_NDF': { a:[479.50,294.20,232.50,201.60], e:88.70 },
+    '2J/2N_NOEL': { a:[471.20,285.90,224.20,193.30], e:82.30 },
+  },
+  'OS': {
+    'nuit_supp': { a:[197.70,107.50,77.40,62.40], e:17.20 },
+    '2J/1N': { a:[256.60,166.40,136,121.20], e:59.60 },
+    '2J/2N_1': { a:[454.30,273.80,213.60,183.50], e:76.70 },
+    '2J/2N_2': { a:[518.60,305.90,235.10,199.60], e:76.70 },
+    '2J/2N_NDF': { a:[534.20,321.60,250.70,215.30], e:88.70 },
+    '3J/2N_1': { a:[460,280,220,190], e:82.30 },
+    '3J/2N_2': { a:[525,312.40,241.50,206.10], e:82.30 },
+    '3J/3N_1': { a:[722.70,419.80,318.80,268.40], e:99.40 },
+    '3J/3N_2': { a:[787,452,340.30,284.40], e:99.40 },
+    '3J/3N_NDF': { a:[805.40,470.40,358.70,302.80], e:111.40 },
+    '4J/3N_1': { a:[727.30,424.40,323.40,273], e:102.20 },
+    '4J/3N_2': { a:[791.60,456.60,344.90,289], e:102.20 },
+  },
+  'CINES': {
+    'nuit_supp': { a:[262,139.60,98.80,78.40], e:17.20 },
+    '2J/1N': { a:[336.60,214.20,173.40,153], e:71.50 },
+    '2J/2N_1': { a:[598.50,353.70,272.10,231.30], e:88.70 },
+    '3J/2N_1': { a:[543.40,330.80,259.90,224.50], e:94.20 },
+    '3J/2N_2': { a:[607.70,362.90,281.30,240.50], e:94.20 },
+    '3J/3N_1': { a:[869.70,502.50,380.10,318.90], e:111.40 },
+    '3J/3N_2': { a:[875.20,508.00,385.60,324.40], e:116 },
+    '4J/3N_1': { a:[810.90,475.90,364.20,308.40], e:116 },
+    '4J/3N_2': { a:[875.20,508,385.60,324.40], e:116 },
+  },
+  'PDF_CINES': {
+    'nuit_supp': { a:[341.70,179.50,125.40,98.40], e:17.20 },
+    '2J/1N_special': { a:[445.30,283,228.90,201.90], e:100.80 }, // ligne rouge
+    '2J/2N': { a:[707.20,422.60,327.70,280.30], e:118 },
+    '3J/2N': { a:[715.80,431.20,336.30,288.80], e:123.70 },
+    '3J/3N_1': { a:[913.50,538.60,413.60,351.10], e:140.90 },
+    '3J/3N_2': { a:[977.80,570.80,435.10,367.20], e:140.90 },
+    '4J/3N_1': { a:[919.20,544.30,419.30,356.80], e:144.70 },
+    '4J/3N_2': { a:[983.50,576.40,440.80,372.90], e:144.70 },
+  },
+  'NOEL': {
+    'nuit_supp': { a:[262,139.60,98.80,78.40], e:17.20 },
+    '2J/1N': { a:[328.30,205.90,165.10,144.70], e:65.10 },
+    '2J/2N': { a:[590.30,345.50,263.10,223.10], e:82.30 },
+    '3J/2N': { a:[598.50,353.70,272.10,231.30], e:87.80 },
+    '3J/3N': { a:[860.50,493.30,370.90,309.70], e:105 },
+    '4J/3N': { a:[865.10,497.90,375.50,314.30], e:108.60 },
+  }
+};
+
+// *** LE CAMP DU DRAP D'OR ***
+// Adultes : 4,3,2,1
+const T_CAMP_DRAP = {
+  'NDF_OS': {
+    'nuit_supp': { a:[98.90,58.40,44.90,38.20], e:17.90 },
+    '1J/1N_OS': { a:[135.90,95.40,81.90,75.20], e:44.90 },
+    '1J/1N_NDF': { a:[145.90,105.40,91.90,85.20], e:51.90 },
+    '1J/1N_NOEL': { a:[140.90,100.40,86.90,80.20], e:48.90 },
+    '2J/2N_OS': { a:[308.80,204.30,169.50,152.10], e:81.80 },
+    '2J/2N_NDF': { a:[404.80,260.80,212.80,188.80], e:94.80 },
+    '2J/2N_NOEL': { a:[395.80,251.80,203.80,179.80], e:87.80 },
+  },
+  'OS': {
+    'nuit_supp': { a:[145.90,81.90,60.60,49.90], e:17.90 },
+    '2J/1N': { a:[209.90,145.90,124.60,113.90], e:63.90 },
+    '2J/2N_1': { a:[355.80,227.80,185.20,163.80], e:81.80 },
+    '2J/2N_2': { a:[434.80,267.30,211.50,183.60], e:81.80 },
+    '2J/2N_NDF': { a:[451.80,284.30,228.50,200.60], e:94.80 },
+    '3J/2N_1': { a:[362.80,234.80,192.20,170.80], e:87.80 },
+    '3J/2N_2': { a:[441.80,274.30,218.50,190.60], e:87.80 },
+    '3J/3N_1': { a:[587.70,356.20,279.10,240.50], e:105.70 },
+    '3J/3N_2': { a:[666.70,395.70,305.40,260.20], e:105.70 },
+    '3J/3N_NDF': { a:[686.70,415.70,325.40,280.20], e:118.70 },
+    '4J/3N_1': { a:[592.70,361.20,284.10,245.50], e:108.70 },
+    '4J/3N_2': { a:[671.70,400.70,310.40,265.20], e:108.70 },
+  },
+  'CINES': {
+    'nuit_supp': { a:[224.90,121.40,86.90,69.70], e:17.90 },
+    '2J/1N': { a:[305.90,202.40,167.90,150.70], e:76.90 },
+    '2J/2N_1': { a:[530.80,323.80,254.80,220.30], e:94.80 },
+    '3J/2N_1': { a:[461.80,294.30,238.50,210.60], e:100.80 },
+    '3J/2N_2': { a:[540.80,333.80,264.80,230.30], e:100.80 },
+    '3J/3N_1': { a:[765.70,455.20,351.70,300], e:118.70 },
+    '3J/3N_2': { a:[771.70,461.20,357.70,306], e:123.70 },
+    '4J/3N_1': { a:[692.70,421.70,331.40,286.20], e:123.70 },
+    '4J/3N_2': { a:[771.70,461.20,357.70,306], e:123.70 },
+  },
+  'PDF_CINES': {
+    'nuit_supp': { a:[288.90,153.40,108.30,85.70], e:17.90 },
+    '2J/1N': { a:[397.90,262.40,217.30,194.70], e:105.90 },
+    '2J/2N': { a:[622.80,383.80,304.20,264.30], e:123.80 },
+    '3J/2N': { a:[631.80,392.80,313.20,273.30], e:129.80 },
+    '3J/3N_1': { a:[777.70,474.70,373.70,323.20], e:147.70 },
+    '3J/3N_2': { a:[856.70,514.20,400.10,343], e:147.70 },
+    '4J/3N_1': { a:[783.70,480.70,379.70,329.20], e:151.70 },
+    '4J/3N_2': { a:[862.70,520.20,406.10,349], e:151.70 },
+  },
+  'NOEL': {
+    'nuit_supp': { a:[224.90,121.40,86.90,69.70], e:17.90 },
+    '2J/1N': { a:[296.90,193.40,158.90,141.70], e:69.90 },
+    '2J/2N': { a:[521.80,314.80,245.80,211.30], e:87.80 },
+    '3J/2N': { a:[530.80,323.80,254.80,220.30], e:93.80 },
+    '3J/3N': { a:[755.70,445.20,341.70,290], e:111.70 },
+    '4J/3N': { a:[760.70,450.20,346.70,295], e:115.70 },
+  }
+};
+
+// ============================================================
+// FONCTIONS DE CALCUL
+// ============================================================
+
+let villaMode = 'indiv';
+
+function setVillaMode(mode, btn) {
+  villaMode = mode;
+  document.querySelectorAll('.villa-toggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Recalculate if results are shown
+  if (document.getElementById('resultsSection').classList.contains('show')) {
+    calculer();
+  }
+}
+
+function fmt(v) {
+  if (v === null || v === undefined) return '<span class="na">N/A</span>';
+  return v.toFixed(2).replace('.', ',') + '<span class="currency">€</span>';
+}
+
+function getPrixAdulte(tarif, nbAdultes) {
+  // tarif.a est un tableau [6,5,4,3,2,1] ou [4,3,2,1] ou [2,1]
+  const len = tarif.a.length;
+  if (len === 6) {
+    // index 0=6pers, 1=5, 2=4, 3=3, 4=2, 5=1
+    const idx = 6 - nbAdultes;
+    if (idx < 0 || idx >= 6) return null;
+    return tarif.a[idx] * nbAdultes;
+  } else if (len === 4) {
+    // index 0=4, 1=3, 2=2, 3=1
+    const idx = 4 - nbAdultes;
+    if (idx < 0 || idx >= 4) return null;
+    return tarif.a[idx] * nbAdultes;
+  } else if (len === 2) {
+    // index 0=2, 1=1
+    const idx = 2 - nbAdultes;
+    if (idx < 0 || idx >= 2) return null;
+    return tarif.a[idx] * nbAdultes;
+  }
+  return null;
+}
+
+function getTotalFrom(tarif, nbAdultes, nbEnfants) {
+  if (!tarif) return null;
+  const pa = getPrixAdulte(tarif, nbAdultes);
+  if (pa === null) return null;
+  return pa + tarif.e * nbEnfants;
+}
+
+function getSejourKey(nuits, periode) {
+  // Retourne la clé de séjour principale selon nuits et période
+  // Pour 1 nuit : c'est nuit supplémentaire ou 1J/1N
+  // La logique est complexe. On simplifie :
+  // nuits = départ - arrivée
+  // jours = nuits + 1 (si arrivée = premier jour de visite)
+  const jours = nuits + 1;
+  return { jours, nuits };
+}
+
+function calculerHotel(table, nuits, periode, nbAdultes, nbEnfants, maxAdultes) {
+  if (nbAdultes > maxAdultes) return null;
+
+  const jours = nuits + 1;
+  const results = { std: null, cines: null, noel: null };
+
+  // Détermine quelle section du tableau utiliser selon la période
+  // et récupère les tarifs pour la formule de séjour
+
+  // Mapping formule de séjour
+  const formule = `${jours}J/${nuits}N`;
+
+  function getTarif(block, key) {
+    if (!table[block] || !table[block][key]) return null;
+    return getTotalFrom(table[block][key], nbAdultes, nbEnfants);
+  }
+
+  if (periode === 'NOEL') {
+    // Bloc NOËL
+    if (nuits === 0) {
+      results.std = getTarif('NOEL', 'nuit_supp');
+    } else if (jours === 2 && nuits === 1) {
+      results.std = getTarif('NOEL', '2J/1N');
+    } else if (jours === 2 && nuits === 2) {
+      results.std = getTarif('NOEL', '2J/2N');
+    } else if (jours === 3 && nuits === 2) {
+      results.std = getTarif('NOEL', '3J/2N');
+    } else if (jours === 3 && nuits === 3) {
+      results.std = getTarif('NOEL', '3J/3N');
+    } else if (jours === 4 && nuits === 3) {
+      results.std = getTarif('NOEL', '4J/3N');
+    }
+  } else if (periode === 'OS') {
+    // Bloc OS : formules avec OS
+    if (nuits === 0) {
+      results.std = getTarif('OS', 'nuit_supp');
+    } else if (jours === 2 && nuits === 1) {
+      results.std = getTarif('OS', '2J/1N') || getTarif('NDF_OS', '1J/1N_OS');
+    } else if (jours === 1 && nuits === 1) {
+      results.std = getTarif('NDF_OS', '1J/1N_OS');
+    } else if (jours === 2 && nuits === 2) {
+      results.std = getTarif('NDF_OS', '2J/2N_OS');
+    } else if (jours === 3 && nuits === 2) {
+      results.std = getTarif('OS', '3J/2N_1');
+    } else if (jours === 3 && nuits === 3) {
+      results.std = getTarif('OS', '3J/3N_1');
+    } else if (jours === 4 && nuits === 3) {
+      results.std = getTarif('OS', '4J/3N_1');
+    }
+  } else if (periode === 'NDF') {
+    // Bloc NDF (rouge)
+    if (nuits === 0) {
+      results.std = getTarif('CINES', 'nuit_supp');
+    } else if (jours === 1 && nuits === 1) {
+      results.std = getTarif('NDF_OS', '1J/1N_NDF');
+    } else if (jours === 2 && nuits === 1) {
+      results.std = getTarif('CINES', '2J/1N') || getTarif('CINES', '2J/1N_NDF');
+    } else if (jours === 2 && nuits === 2) {
+      results.std = getTarif('NDF_OS', '2J/2N_NDF');
+    } else if (jours === 3 && nuits === 2) {
+      results.std = getTarif('CINES', '3J/2N_1');
+    } else if (jours === 3 && nuits === 3) {
+      results.std = getTarif('CINES', '3J/3N_1');
+    } else if (jours === 4 && nuits === 3) {
+      results.std = getTarif('CINES', '4J/3N_1');
+    }
+    // Aussi le tarif PDF+CINES si applicable
+    results.cines = calculerCines(table, nuits, nbAdultes, nbEnfants);
+  } else if (periode === 'CINES') {
+    // Cinéscénie : tarif NDF standard + option PDF+CINES
+    if (nuits === 0) {
+      results.std = getTarif('CINES', 'nuit_supp');
+    } else if (jours === 1 && nuits === 1) {
+      results.std = getTarif('NDF_OS', '1J/1N_NDF');
+    } else if (jours === 2 && nuits === 1) {
+      results.std = getTarif('CINES', '2J/1N') || getTarif('CINES', '2J/1N_NDF');
+    } else if (jours === 2 && nuits === 2) {
+      results.std = getTarif('NDF_OS', '2J/2N_NDF');
+    } else if (jours === 3 && nuits === 2) {
+      results.std = getTarif('CINES', '3J/2N_1');
+    } else if (jours === 3 && nuits === 3) {
+      results.std = getTarif('CINES', '3J/3N_1');
+    } else if (jours === 4 && nuits === 3) {
+      results.std = getTarif('CINES', '4J/3N_1');
+    }
+    results.cines = calculerCines(table, nuits, nbAdultes, nbEnfants);
+  }
+
+  return results;
+}
+
+function calculerCines(table, nuits, nbAdultes, nbEnfants) {
+  const jours = nuits + 1;
+  function getTarif(key) {
+    if (!table['PDF_CINES'] || !table['PDF_CINES'][key]) return null;
+    return getTotalFrom(table['PDF_CINES'][key], nbAdultes, nbEnfants);
+  }
+  if (nuits === 0) return getTarif('nuit_supp');
+  if (jours === 2 && nuits === 1) return getTarif('2J/1N') || getTarif('2J/1N_special');
+  if (jours === 2 && nuits === 2) return getTarif('2J/2N');
+  if (jours === 3 && nuits === 2) return getTarif('3J/2N');
+  if (jours === 3 && nuits === 3) return getTarif('3J/3N_1');
+  if (jours === 4 && nuits === 3) return getTarif('4J/3N_1');
+  return null;
+}
+
+function calculer() {
+  const arrivee = document.getElementById('dateArrivee').value;
+  const depart = document.getElementById('dateDepart').value;
+  const nbAdultes = parseInt(document.getElementById('nbAdultes').value);
+  const nbEnfants = parseInt(document.getElementById('nbEnfants').value);
+
+  const errEl = document.getElementById('errorMsg');
+  const periodeEl = document.getElementById('periodeInfo');
+  errEl.classList.remove('show');
+  periodeEl.classList.remove('show','os','ndf','noel','cines','std');
+
+  if (!arrivee || !depart) {
+    errEl.textContent = 'Veuillez saisir les dates d\'arrivée et de départ.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const nuits = getDaysBetween(arrivee, depart);
+  if (nuits < 1) {
+    errEl.textContent = 'La date de départ doit être après la date d\'arrivée.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (nuits > 3) {
+    errEl.textContent = 'Les séjours de plus de 3 nuits (4J/3N) ne sont pas disponibles dans ce simulateur.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const jours = nuits + 1;
+  const periode = getPeriodeForStay(arrivee, depart);
+
+  if (!periode) {
+    errEl.textContent = 'Le Puy du Fou n\'est pas ouvert à cette date. Vérifiez le calendrier d\'ouverture 2026.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  // Afficher la période détectée
+  const periodeLabels = {
+    'OS': { cls:'os', txt:'📅 Période Offre Spéciale (OS) — -20% sur les billets' },
+    'NDF': { cls:'ndf', txt:'🎭 Période Noces de Feu — spectacle nocturne inclus' },
+    'NOEL': { cls:'noel', txt:'🎄 Période Noël au Puy du Fou' },
+    'CINES': { cls:'cines', txt:'🎬 Période Cinéscénie — spectacle en supplément disponible' },
+  };
+  const pl = periodeLabels[periode];
+  if (pl) {
+    periodeEl.className = `periode-info show ${pl.cls}`;
+    periodeEl.textContent = pl.txt;
+  }
+
+  // Badge séjour
+  document.getElementById('sejourBadge').textContent = `${jours}J / ${nuits}N — ${nbAdultes} adulte${nbAdultes>1?'s':''} ${nbEnfants>0 ? '+ '+nbEnfants+' enfant'+(nbEnfants>1?'s':'') : ''}`;
+
+  // Calcul tous hôtels
+  const hotelsGrid = document.getElementById('hotelsGrid');
+  hotelsGrid.innerHTML = '';
+
+  const hotels = [
+    {
+      id:'lescure',
+      name:'Logis de Lescure',
+      icon:'🏰',
+      sub:'',
+      table: T_LESCURE,
+      maxA: 6,
+      double: false,
+    },
+    {
+      id:'grand_siecle',
+      name:'Le Grand Siècle',
+      icon:'👑',
+      sub:'',
+      table: T_GRAND_SIECLE,
+      maxA: 4,
+      double: false,
+    },
+    {
+      id:'citadelle',
+      name:'La Citadelle',
+      icon:'🏯',
+      sub:'',
+      table: null,
+      maxA: 4,
+      double: true,
+    },
+    {
+      id:'iles_clovis',
+      name:'Les Îles de Clovis',
+      icon:'🏝️',
+      sub:'',
+      table: T_ILES_CLOVIS,
+      maxA: 4,
+      double: false,
+    },
+    {
+      id:'villa',
+      name:'La Villa Gallo-Romaine',
+      icon:'🏛️',
+      sub:'',
+      table: villaMode === 'indiv' ? T_VILLA_INDIV : T_VILLA_CSE,
+      maxA: 4,
+      double: false,
+      villaMode: true,
+    },
+    {
+      id:'camp_drap',
+      name:'Le Camp du Drap d\'Or',
+      icon:'⚔️',
+      sub:'',
+      table: T_CAMP_DRAP,
+      maxA: 4,
+      double: false,
+    },
+  ];
+
+  hotels.forEach(hotel => {
+    const card = document.createElement('div');
+    card.className = 'hotel-card' + (hotel.double ? ' double' : '');
+
+    if (hotel.double) {
+      // Citadelle : deux colonnes
+      const rCl = calculerHotel(T_CITADELLE_CL, nuits, periode, nbAdultes, nbEnfants, 4);
+      const rCo = calculerHotel(T_CITADELLE_CO, nuits, periode, Math.min(nbAdultes, 2), nbEnfants, 2);
+
+      card.innerHTML = `
+        <div class="hotel-card-header">
+          <div>
+            <div class="hotel-name">${hotel.icon} ${hotel.name}</div>
+            <div class="hotel-sub">Deux types de chambres disponibles</div>
+          </div>
+        </div>
+        <div class="double-grid">
+          <div class="double-col">
+            <div class="double-col-title">Chambre Classique (max 4 pers.)</div>
+            ${renderResult(rCl, periode, nbAdultes, nbEnfants)}
+          </div>
+          <div class="double-col">
+            <div class="double-col-title">Chambre Confort (max 2 pers.)</div>
+            ${nbAdultes > 2 ? '<p class="na" style="font-size:13px;padding:8px 0">Non disponible pour '+nbAdultes+' adultes</p>' : renderResult(rCo, periode, Math.min(nbAdultes,2), nbEnfants)}
+          </div>
+        </div>`;
+    } else {
+      const r = calculerHotel(hotel.table, nuits, periode, nbAdultes, nbEnfants, hotel.maxA);
+      const naMsg = nbAdultes > hotel.maxA ? `<p class="na" style="padding:8px 0;font-size:13px">Non disponible pour ${nbAdultes} adultes (max ${hotel.maxA})</p>` : '';
+
+      card.innerHTML = `
+        <div class="hotel-card-header">
+          <div>
+            <div class="hotel-name">${hotel.icon} ${hotel.name}</div>
+            ${hotel.villaMode ? `<div class="hotel-sub">Tarifs : ${villaMode === 'indiv' ? 'Individuels' : 'CSE / Groupes'}</div>` : ''}
+          </div>
+        </div>
+        <div class="hotel-card-body">
+          ${naMsg || renderResult(r, periode, nbAdultes, nbEnfants)}
+        </div>`;
+    }
+
+    hotelsGrid.appendChild(card);
+  });
+
+  // Info block
+  const infoLines = [
+    '<strong>Prix indiqués par personne × nombre de personnes, nuitées petit-déjeuner inclus.</strong>',
+    'Ces tarifs s\'appliquent pour les réservations jusqu\'à <strong>72h avant la date de visite</strong>.',
+    periode === 'CINES' ? '🎬 La Cinéscénie est un spectacle en <strong>supplément</strong> — deux tarifs sont donc affichés : sans et avec Cinéscénie.' : '',
+    periode === 'OS' ? '✅ Période Offre Spéciale : <strong>-20% sur les billets</strong> inclus dans le prix du séjour.' : '',
+    periode === 'NDF' ? '🎭 Les Noces de Feu sont <strong>incluses</strong> dans le prix du séjour pour cette période.' : '',
+    'Hors taxe de séjour. Enfants de 3 à 11 ans inclus.'
+  ].filter(Boolean);
+  document.getElementById('infoBlock').innerHTML = infoLines.join('<br>');
+
+  document.getElementById('resultsSection').classList.add('show');
+}
+
+function renderResult(r, periode, nbAdultes, nbEnfants) {
+  if (!r) return '<p class="na" style="padding:8px 0;font-size:13px">Tarif non disponible</p>';
+
+  let html = '';
+
+  if (r.std !== null) {
+    const label = periode === 'CINES' ? 'Sans Cinéscénie' : (periode === 'NDF' ? 'Noces de Feu incluses' : 'Total séjour');
+    html += `
+      <div class="tarif-section-title">${label}</div>
+      <div class="tarif-row">
+        <div class="tarif-label">Total <span>(${nbAdultes} adulte${nbAdultes>1?'s':''} ${nbEnfants>0?'+ '+nbEnfants+' enf.':''})</span></div>
+        <div class="tarif-value">${fmt(r.std)}</div>
+      </div>`;
+  } else {
+    html += '<p class="na" style="font-size:13px;padding:4px 0">Tarif standard non disponible</p>';
+  }
+
+  if (r.cines !== null && r.cines !== undefined) {
+    html += `
+      <div class="tarif-section-title" style="color:var(--cines-color);margin-top:12px">🎬 Avec PDF + Cinéscénie</div>
+      <div class="tarif-row">
+        <div class="tarif-label">Total <span>(billets + Cinéscénie)</span></div>
+        <div class="tarif-value" style="color:#5dade2">${fmt(r.cines)}</div>
+      </div>`;
+  }
+
+  return html;
+}
+
+// Initialiser les dates par défaut
+window.addEventListener('load', () => {
+  const today = new Date();
+  // Par défaut : dans 7 jours pour 2 nuits
+  const arr = new Date(today); arr.setDate(arr.getDate() + 7);
+  const dep = new Date(arr); dep.setDate(dep.getDate() + 2);
+  document.getElementById('dateArrivee').value = arr.toISOString().slice(0,10);
+  document.getElementById('dateDepart').value = dep.toISOString().slice(0,10);
+  document.getElementById('nbAdultes').value = '2';
+});
+</script>
+
+</body>
+</html>
