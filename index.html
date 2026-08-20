@@ -1805,7 +1805,7 @@ function renderPassBar(ctx, containerId) {
       return `<button type="button" class="pass-day${d.sel ? ' on' : ''}" ${d.disabled ? 'disabled' : ''} onclick="togglePassDay('${ctx.scope}','${d.date}')">${d.sel ? '☑' : '☐'} ${lbl}${d.note ? ` <span style="font-weight:400">(${d.note})</span>` : ''}${price}</button>`;
     }).join('');
     inner += `
-    ${ctx.late ? `<div class="mention-alert" style="margin:10px 0 0">⏱️ Visite dans moins de 3 jours : Pass Émotion à <strong>53 €/jour/pers</strong>, vente <strong>uniquement aux entrées du parc</strong> — estimation, pas de vente Onepilot.</div>` : ''}
+    ${ctx.late ? `<div class="mention-alert" style="margin:10px 0 0">⏱️ Visite dans moins de 3 jours : Pass Émotion à <strong>53 €/jour/pers</strong>, vente <strong>uniquement aux entrées du parc</strong></div>` : ''}
     <div class="pass-days" style="margin-top:10px">${btns}</div>
     <div class="pass-total">${ctx.count === 0 ? 'Aucun jour sélectionné — les cartes affichent le tarif sans pass.' : `${ctx.count} jour${ctx.count>1?'s':''} × ${ctx.persons} pers = <span class="big">${fmt(ctx.total)} €</span> <span style="font-weight:500;color:var(--gray-700)">— intégré aux totaux des cartes ci-dessous</span>`}</div>
     <div class="pass-notes">Non valable sur le spectacle de la Cinéscénie · gratuit pour les moins de 3 ans (non comptés) · payant pour tous les autres visiteurs, <strong>aucune réduction Famille nombreuse / PSH</strong>.</div>`;
